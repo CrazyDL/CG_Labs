@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:weightSum="100"
+    android:background="@color/colorBackground"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:id="@+id/txtA"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/inpA"
+        android:text="@string/view_a"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:layout_weight="6"
+        android:textAlignment="viewEnd"
+        />
+
+    <EditText
+        android:id="@id/inpA"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:layout_weight="16"
+        android:text="1"
+        />
+
+
+    <TextView
+        android:id="@+id/txtK"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/view_k"
+        android:labelFor="@+id/inpK"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:layout_weight="6"
+        android:textAlignment="viewEnd"
+        />
+
+    <EditText
+        android:id="@id/inpK"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberSigned|numberDecimal"
+        android:layout_weight="16"
+        android:text="0.1"
+        />
+
+
+    <TextView
+        android:id="@+id/txtB"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/view_B"
+        android:labelFor="@+id/inpB"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:layout_weight="6"
+        android:textAlignment="viewEnd"
+        />
+
+    <EditText
+        android:id="@id/inpB"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:layout_weight="16"
+        android:text="360"
+        />
+
+    <Button
+        android:id="@+id/btnBuildGraph"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="34"
+        android:text="@string/build_a_graph"
+        android:textSize="14sp"
+        android:background="@drawable/button_background"
+        android:textColor="@color/colorText"/>
+
+</LinearLayout>

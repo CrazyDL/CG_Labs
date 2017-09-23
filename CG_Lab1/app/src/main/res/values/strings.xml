@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CG_Lab1</string>
+    <string name="view_B">B:</string>
+    <string name="view_a">a:</string>
+    <string name="view_k">k:</string>
+    <string name="build_a_graph">Build a graph</string>
+</resources>
