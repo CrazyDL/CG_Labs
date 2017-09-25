@@ -2,6 +2,7 @@ package com.crazydl.cg_lab1;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.v4.content.ContextCompat;
@@ -9,13 +10,15 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.View;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
-public class GraphView extends View {
+public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
     Paint pAxis = new Paint();
     Paint pGraph = new Paint();
     Path pathGraph = new Path();
 
+    private DrawThread drawThread;
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
@@ -59,6 +62,8 @@ public class GraphView extends View {
         gestureDetector = new GestureDetector(context, new MyGestureListener());
 
         setConstants();
+
+        getHolder().addCallback(this);
     }
 
     public static void setConstants(float _a, float _k, float _B){
@@ -93,22 +98,8 @@ public class GraphView extends View {
         scaleFactor = 1f;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
-        scaleGestureDetector.onTouchEvent(event);
-        return true;
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        viewHeight = h;
-        viewWidth = w;
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
+    void drawGraph(Canvas canvas){
+        //canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
 
         float canvasWidth = canvas.getWidth();
@@ -131,17 +122,83 @@ public class GraphView extends View {
         float res = function(0);
         pathGraph.reset();
         pathGraph.moveTo(halfWidth + res * (float)Math.cos(0) * optimalScale * scaleFactor,
-                    halfHeight - res * (float)Math.sin(0) * optimalScale * scaleFactor);
+                halfHeight - res * (float)Math.sin(0) * optimalScale * scaleFactor);
         for (float t = 0; t <= B; t += Math.PI/180){
             res = function(t);
             pathGraph.lineTo(halfWidth + res * (float)Math.cos(t) * optimalScale * scaleFactor,
                     halfHeight - res * (float)Math.sin(t) * optimalScale * scaleFactor);
         }
         canvas.drawPath(pathGraph, pGraph);
-        invalidate();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        drawThread = new DrawThread(getHolder());
+        drawThread.setRunning(true);
+        drawThread.start();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+        viewHeight = i;
+        viewWidth = i1;
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        boolean retry = true;
+        drawThread.setRunning(false);
+        while (retry){
+            try {
+                drawThread.join();
+                retry = false;
+            } catch (InterruptedException ignored) {}
+        }
     }
 
 
+
+    private class DrawThread extends Thread{
+        private SurfaceHolder surfaceHolder;
+        private boolean running = false;
+
+        DrawThread(SurfaceHolder surfaceHolder) {
+            this.surfaceHolder = surfaceHolder;
+        }
+
+        void setRunning(boolean running) {
+            this.running = running;
+        }
+
+        @Override
+        public void run() {
+            Canvas canvas;
+            while (running){
+                canvas = null;
+                try {
+                    canvas = surfaceHolder.lockCanvas(null);
+                    if(canvas == null)
+                        continue;
+                    synchronized ((Object) scaleFactor) {
+                        canvas.drawColor(Color.BLACK);
+                        drawGraph(canvas);
+                    }
+                } finally {
+                    if(canvas != null)
+                        surfaceHolder.unlockCanvasAndPost(canvas);
+                }
+            }
+        }
+
+
+    }
     private class MyScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
@@ -158,13 +215,6 @@ public class GraphView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            /*if(getScrollX() + distanceX < canvasWidth - viewWidth  && getScrollX() + distanceX > 0){
-                scrollBy((int)distanceX, 0);
-            }
-
-            if(getScrollY() + distanceY < canvasHeight - viewHeight  && getScrollY() + distanceY > 0){
-                scrollBy(0, (int)distanceY);
-            }*/
             return true;
         }
     }
