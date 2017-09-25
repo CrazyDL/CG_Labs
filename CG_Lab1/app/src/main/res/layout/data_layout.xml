@@ -82,6 +82,6 @@
         android:text="@string/build_a_graph"
         android:textSize="14sp"
         android:background="@drawable/button_background"
-        android:textColor="@color/colorText"/>
+        android:textColor="@color/colorWhite"/>
 
 </LinearLayout>

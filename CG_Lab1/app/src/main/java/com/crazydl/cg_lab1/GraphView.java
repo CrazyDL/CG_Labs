@@ -6,9 +6,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Toast;
 
 public class GraphView extends View {
     Paint pAxis = new Paint();
@@ -16,10 +17,11 @@ public class GraphView extends View {
     Path pathGraph = new Path();
 
     private ScaleGestureDetector scaleGestureDetector;
-    private float scaleFactor;
+    private GestureDetector gestureDetector;
+    private float mScaleFactor;
 
-    private static float canvasWidth, canvasHeight;
-    private static float a = 1, k = 0.1f, B = 360;
+    private static float canvasWidth, canvasHeight, viewWidth, viewHeight;
+    private static float a, k, B;
 
     public GraphView(Context context) {
         super(context);
@@ -51,8 +53,12 @@ public class GraphView extends View {
         pGraph.setStyle(Paint.Style.STROKE);
         pGraph.setAntiAlias(true);
 
-        scaleFactor = 1f;
+        viewWidth = context.getResources().getDisplayMetrics().widthPixels;
+        viewHeight = context.getResources().getDisplayMetrics().heightPixels;
+        mScaleFactor = 1f;
         scaleGestureDetector = new ScaleGestureDetector(context, new MyScaleGestureListener());
+        gestureDetector = new GestureDetector(context, new MyGestureListener());
+        setConstants(1, 0.1f, 1800);
     }
 
     public static void setConstants(float _a, float _k, float _B){
@@ -62,17 +68,18 @@ public class GraphView extends View {
     }
 
     @Override
-    public void setOnTouchListener(OnTouchListener l) {
-        scaleGestureDetector.onTouchEvent();
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
+        return true;
     }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.save();
-        canvas.scale(scaleFactor, scaleFactor);
+        canvas.scale(mScaleFactor, mScaleFactor);
 
-        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorBackground));
+        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
 
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
@@ -106,8 +113,8 @@ public class GraphView extends View {
                 maxY = y;
         }
 
-        Toast.makeText(getContext(), "maxX: " + Float.toString(maxX) +
-                                     "\nmaxY: " + Float.toString(maxY), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), "maxX: " + Float.toString(maxX) +
+        //                             "\nmaxY: " + Float.toString(maxY), Toast.LENGTH_SHORT).show();
 
         float scale = Math.min(halfWidth / maxX, halfHeight / maxY);
         scale -= scale / 20;
@@ -128,7 +135,40 @@ public class GraphView extends View {
     private class MyScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            return super.onScale(detector);
+            float scaleFactor = scaleGestureDetector.getScaleFactor();
+            float focusX = scaleGestureDetector.getFocusX();
+            float focusY = scaleGestureDetector.getFocusY();
+
+            if(mScaleFactor * scaleFactor > 1 && mScaleFactor * scaleFactor < 4){
+                mScaleFactor *= scaleGestureDetector.getScaleFactor();
+                canvasWidth *= mScaleFactor;
+                canvasHeight *=  mScaleFactor;
+
+                float scrollX= (getScrollX() + focusX) * scaleFactor - focusX;
+                scrollX = Math.min(Math.max(scrollX, 0), canvasWidth - viewWidth);
+                float scrollY= (getScrollY() + focusY) * scaleFactor-focusY;
+                scrollY = Math.min(Math.max(scrollY, 0), canvasHeight - viewHeight);
+                scrollTo((int)scrollX, (int)scrollY);
+            }
+
+            invalidate();
+            return true;
+        }
+    }
+
+
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            /*if(getScrollX() + distanceX < canvasWidth - viewWidth  && getScrollX() + distanceX > 0){
+                scrollBy((int)distanceX, 0);
+            }
+
+            if(getScrollY() + distanceY < canvasHeight - viewHeight  && getScrollY() + distanceY > 0){
+                scrollBy(0, (int)distanceY);
+            }*/
+            return true;
         }
     }
 }
