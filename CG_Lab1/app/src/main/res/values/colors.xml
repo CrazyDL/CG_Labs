@@ -3,6 +3,7 @@
     <color name="colorPrimary">#009999</color>
     <color name="colorPrimaryDark">#006363</color>
     <color name="colorAccent">#FF7400</color>
+    <color name="colorCanvasBackground">#D7FFFF</color>
     <color name="colorBackground">#CCFFFF</color>
     <color name="colorWhite">#FFF</color>
     <color name="colorAxis">#4E5151</color>

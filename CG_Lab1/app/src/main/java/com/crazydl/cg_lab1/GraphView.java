@@ -18,10 +18,10 @@ public class GraphView extends View {
 
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
-    private float mScaleFactor;
 
+    private static float mScaleFactor;
     private static float canvasWidth, canvasHeight, viewWidth, viewHeight;
-    private static float a, k, B;
+    private static float a = 1, k = 0.1f, B = 4 * (float)Math.PI;
 
     public GraphView(Context context) {
         super(context);
@@ -39,8 +39,7 @@ public class GraphView extends View {
     }
 
     private static float function(float t){
-        float r = a * (float)Math.exp(k * t);
-        return r;
+        return a * (float)Math.exp(k * t);
     }
 
     private void init(Context context){
@@ -58,13 +57,38 @@ public class GraphView extends View {
         mScaleFactor = 1f;
         scaleGestureDetector = new ScaleGestureDetector(context, new MyScaleGestureListener());
         gestureDetector = new GestureDetector(context, new MyGestureListener());
-        setConstants(1, 0.1f, 1800);
+
+        setConstants();
     }
 
     public static void setConstants(float _a, float _k, float _B){
         a = _a;
         k = _k;
-        B = _B;
+        B = _B * (float)Math.PI / 180;
+        setConstants();
+    }
+
+    public static void setConstants(){
+        float res = function(0);
+
+        float maxX = res * (float)Math.cos(0),
+              maxY = res * (float)Math.sin(0);
+
+        float x, y;
+        for (float t = 0; t <= B; t += Math.PI/180){
+            res = function(t);
+            x = Math.abs(res * (float)Math.cos(t));
+            y = Math.abs(res * (float)Math.sin(t));
+            if(x > maxX)
+                maxX = x;
+            if(y > maxY)
+                maxY = y;
+        }
+        //Toast.makeText(getContext(), "maxX: " + Float.toString(maxX) +
+        //                             "\nmaxY: " + Float.toString(maxY), Toast.LENGTH_SHORT).show();
+
+        mScaleFactor = Math.min((viewWidth / 2) / maxX, (viewHeight / 2) / maxY);
+        mScaleFactor -= mScaleFactor / 20;
     }
 
     @Override
@@ -75,11 +99,15 @@ public class GraphView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.save();
-        canvas.scale(mScaleFactor, mScaleFactor);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        viewHeight = h;
+        viewWidth = w;
+    }
 
-        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
 
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
@@ -96,39 +124,17 @@ public class GraphView extends View {
         canvas.drawLine(canvasWidth - canvasWidth / 50, halfHeight - canvasWidth / 150, canvasWidth, halfHeight, pAxis);
         canvas.drawLine(canvasWidth - canvasWidth / 50, halfHeight + canvasWidth / 150, canvasWidth, halfHeight, pAxis);
 
-        float radB = B * (float)Math.PI / 180;
+
+
         float res = function(0);
-
-        float maxX = res * (float)Math.cos(0),
-              maxY = res * (float)Math.sin(0);
-
-        float x, y;
-        for (float t = 0; t <= radB; t += Math.PI/180){
-            res = function(t);
-            x = Math.abs(res * (float)Math.cos(t));
-            y = Math.abs(res * (float)Math.sin(t));
-            if(x > maxX)
-                maxX = x;
-            if(y > maxY)
-                maxY = y;
-        }
-
-        //Toast.makeText(getContext(), "maxX: " + Float.toString(maxX) +
-        //                             "\nmaxY: " + Float.toString(maxY), Toast.LENGTH_SHORT).show();
-
-        float scale = Math.min(halfWidth / maxX, halfHeight / maxY);
-        scale -= scale / 20;
-
-        res = function(0);
         pathGraph.reset();
-        pathGraph.moveTo(halfWidth + res * (float)Math.cos(0) * scale, halfHeight - res * (float)Math.sin(0) * scale);
-        for (float t = 0; t <= radB; t += Math.PI/180){
+        pathGraph.moveTo(halfWidth + res * (float)Math.cos(0) * mScaleFactor, halfHeight - res * (float)Math.sin(0) * mScaleFactor);
+        for (float t = 0; t <= B; t += Math.PI/180){
             res = function(t);
-            pathGraph.lineTo(halfWidth + res * (float)Math.cos(t)* scale, halfHeight - res * (float)Math.sin(t) * scale );
+            pathGraph.lineTo(halfWidth + res * (float)Math.cos(t)* mScaleFactor, halfHeight - res * (float)Math.sin(t) * mScaleFactor );
         }
         canvas.drawPath(pathGraph, pGraph);
-
-        canvas.restore();
+        invalidate();
     }
 
 
@@ -139,19 +145,17 @@ public class GraphView extends View {
             float focusX = scaleGestureDetector.getFocusX();
             float focusY = scaleGestureDetector.getFocusY();
 
-            if(mScaleFactor * scaleFactor > 1 && mScaleFactor * scaleFactor < 4){
+            //if(mScaleFactor * scaleFactor > 1 && mScaleFactor * scaleFactor < 4){
                 mScaleFactor *= scaleGestureDetector.getScaleFactor();
-                canvasWidth *= mScaleFactor;
-                canvasHeight *=  mScaleFactor;
+                //canvasWidth *= mScaleFactor;
+                //canvasHeight *=  mScaleFactor;
 
-                float scrollX= (getScrollX() + focusX) * scaleFactor - focusX;
+                /*float scrollX= (getScrollX() + focusX) * scaleFactor - focusX;
                 scrollX = Math.min(Math.max(scrollX, 0), canvasWidth - viewWidth);
                 float scrollY= (getScrollY() + focusY) * scaleFactor-focusY;
                 scrollY = Math.min(Math.max(scrollY, 0), canvasHeight - viewHeight);
-                scrollTo((int)scrollX, (int)scrollY);
-            }
-
-            invalidate();
+                scrollTo((int)scrollX, (int)scrollY);*/
+            //}
             return true;
         }
     }

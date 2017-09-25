@@ -71,7 +71,7 @@
         android:ems="10"
         android:inputType="numberDecimal"
         android:layout_weight="16"
-        android:text="360"
+        android:text="720"
         />
 
     <Button

@@ -58,6 +58,7 @@ public class DataFragment extends Fragment {
                 inpK.clearFocus();
                 inpB.clearFocus();
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
             }
         });
     }
