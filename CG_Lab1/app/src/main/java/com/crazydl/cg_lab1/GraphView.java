@@ -25,7 +25,7 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-    private static float fieldSize, textSize = 16, cellSize,
+    private static float fieldSize, textSize = 14, cellSize,
                          scaleFactor, optimalScale,
                          viewWidth, viewHeight,
                          offsetX = 0, offsetY = 0,
@@ -110,10 +110,6 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
         fieldSize = Math.max(viewWidth / fieldCount, viewHeight / fieldCount);
 
         cellSize = fieldSize / optimalScale;
-
-
-
-
     }
 
     void drawGraph(Canvas canvas){
@@ -132,31 +128,33 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
         float fieldOffsetY = localOffsetY % (fieldSize * localScaleFactor);
 
         pText.setTextAlign(Paint.Align.CENTER);
-        float value = (int)(-offsetX / (cellSize * localScaleFactor)) * (cellSize * localScaleFactor) + (cellSize * localScaleFactor);
+        float value = (int)Math.ceil((-localOffsetX / localScaleFactor - 1) / fieldSize) * cellSize + cellSize;
         for (float x = halfWidth + fieldSize * localScaleFactor; x + fieldOffsetX <= canvasWidth; x += fieldSize * localScaleFactor){
             canvas.drawLine(x + fieldOffsetX, 0, x + fieldOffsetX, viewHeight, pField);
-            canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + offsetY - 4, pText);
+            canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + localOffsetY - 4, pText);
             value +=  cellSize;
         }
-        value = (int)(-offsetX / (cellSize * localScaleFactor)) * (cellSize * localScaleFactor);
+        value = (int)Math.ceil((-localOffsetX / localScaleFactor - 1) / fieldSize) * cellSize;
         for (float x = halfWidth; x + fieldOffsetX >= 0; x -= fieldSize * localScaleFactor){
             canvas.drawLine(x + fieldOffsetX, 0, x + fieldOffsetX, viewHeight, pField);
-            canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + offsetY - 4, pText);
+            if(x + fieldOffsetX != halfWidth + localOffsetX)
+                canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + localOffsetY - 4, pText);
             value -=  cellSize;
         }
 
         pText.setTextAlign(Paint.Align.LEFT);
-        value = (int)(offsetY / (cellSize * localScaleFactor)) * (cellSize * localScaleFactor);
+
+        value = (int)Math.ceil((localOffsetY / localScaleFactor)/ fieldSize) * cellSize;
         for (float y = halfHeight; y + fieldOffsetY <= viewHeight; y += fieldSize * localScaleFactor){
             canvas.drawLine(0, y + fieldOffsetY, viewWidth, y + fieldOffsetY, pField);
-            canvas.drawText(Integer.toString((int)value), halfWidth + offsetX + 4, y + fieldOffsetY, pText);
+            canvas.drawText(Integer.toString((int)value), halfWidth + localOffsetX + 4, y + fieldOffsetY, pText);
             value -=  cellSize;
         }
-        value = (int)(offsetY / (cellSize * localScaleFactor)) * (cellSize * localScaleFactor) + (cellSize * localScaleFactor);
+        value = (int)Math.ceil((localOffsetY / localScaleFactor) / fieldSize) * cellSize + cellSize;
         for (float y = halfHeight - fieldSize * localScaleFactor; y + fieldOffsetY >= 0; y -= fieldSize * localScaleFactor){
             canvas.drawLine(0, y + fieldOffsetY, viewWidth, y + fieldOffsetY, pField);
-            canvas.drawText(Integer.toString((int)value), halfWidth + offsetX + 4, y + fieldOffsetY, pText);
-            value += cellSize;
+            canvas.drawText(Integer.toString((int)value), halfWidth + localOffsetX + 4, y + fieldOffsetY, pText);
+            value +=  cellSize;
         }
 
         canvas.drawLine(0, halfHeight + localOffsetY, canvasWidth, halfHeight + localOffsetY, pAxis);
