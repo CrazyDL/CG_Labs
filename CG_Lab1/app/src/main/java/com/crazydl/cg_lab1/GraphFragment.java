@@ -20,7 +20,7 @@ public class GraphFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View _view = inflater.inflate(R.layout.graph_layout, container, false);
-        graphView = (GraphView ) _view.findViewById(R.id.graphView);
+        graphView = _view.findViewById(R.id.graphView);
         return _view;
     }
 

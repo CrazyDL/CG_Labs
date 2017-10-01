@@ -253,16 +253,13 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
                 }
             }
         }
-
-
     }
+
     private class MyScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float newScale = scaleFactor * scaleGestureDetector.getScaleFactor();
             if(newScale > 0.4 && newScale < 8){
-                float focusX = scaleGestureDetector.getFocusX();
-                float focusY = scaleGestureDetector.getFocusY();
                 scaleFactor = newScale;
                 if(newScale < 0.6)
                     textSize = 8;
@@ -276,20 +273,10 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
                     textSize = 16;
                 else
                     textSize = 18;
-                /*float a = getScrollX();
-                float b = getScrollY();
-                offsetX = focusX;
-                offsetY = focusY;
-                /*offsetX += offsetX + (getScrollX() + focusX) * scaleFactor - focusX;
-                offsetY += offsetY + (getScrollY() + focusY) * scaleFactor - focusY;*/
-
-
-
             }
             return true;
         }
     }
-
 
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
