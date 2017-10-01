@@ -14,6 +14,8 @@ import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.Locale;
+
 public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
     Paint pAxis = new Paint();
     Paint pField = new Paint();
@@ -113,9 +115,9 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
     }
 
     void drawGraph(Canvas canvas){
-        float localScaleFactor = scaleFactor,
-              localOffsetX = offsetX,
-              localOffsetY = offsetY;
+        float lclSF = scaleFactor,
+              lclOffsetX = offsetX,
+              lclOffsetY = offsetY;
         canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
 
         float canvasWidth = canvas.getWidth();
@@ -124,50 +126,68 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
         float halfHeight = canvasHeight / 2;
         float halfWidth = canvasWidth / 2;
 
-        float fieldOffsetX = localOffsetX % (fieldSize * localScaleFactor);
-        float fieldOffsetY = localOffsetY % (fieldSize * localScaleFactor);
+        float fieldOX = lclOffsetX % (fieldSize * lclSF);
+        float fieldOY = lclOffsetY % (fieldSize * lclSF);
 
+        pText.setTextSize(textSize);
         pText.setTextAlign(Paint.Align.CENTER);
-        float value = (int)Math.ceil((-localOffsetX / localScaleFactor - 1) / fieldSize) * cellSize + cellSize;
-        for (float x = halfWidth + fieldSize * localScaleFactor; x + fieldOffsetX <= canvasWidth; x += fieldSize * localScaleFactor){
-            canvas.drawLine(x + fieldOffsetX, 0, x + fieldOffsetX, viewHeight, pField);
-            canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + localOffsetY - 4, pText);
+        float value;
+        if(lclOffsetX < 0)
+            value = ((int)Math.floor((-lclOffsetX / lclSF)/ fieldSize) + 1) * cellSize;
+        else
+            value = ((int)Math.ceil((-lclOffsetX / lclSF)/ fieldSize) + 1) * cellSize;
+        for (float x = halfWidth + fieldSize * lclSF; x + fieldOX <= canvasWidth; x += fieldSize * lclSF){
+            canvas.drawLine(x + fieldOX, 0, x + fieldOX, viewHeight, pField);
+            canvas.drawText(String.format(Locale.ENGLISH, "%.2f", value), x + fieldOX, halfHeight + lclOffsetY - 4, pText);
             value +=  cellSize;
         }
-        value = (int)Math.ceil((-localOffsetX / localScaleFactor - 1) / fieldSize) * cellSize;
-        for (float x = halfWidth; x + fieldOffsetX >= 0; x -= fieldSize * localScaleFactor){
-            canvas.drawLine(x + fieldOffsetX, 0, x + fieldOffsetX, viewHeight, pField);
-            if(x + fieldOffsetX != halfWidth + localOffsetX)
-                canvas.drawText(Integer.toString((int)value), x + fieldOffsetX, halfHeight + localOffsetY - 4, pText);
+        if(lclOffsetX < 0)
+            value =  (int)Math.floor((-lclOffsetX / lclSF)/ fieldSize) * cellSize;
+        else
+            value =  (int)Math.ceil((-lclOffsetX / lclSF)/ fieldSize) * cellSize;
+        for (float x = halfWidth; x + fieldOX >= 0; x -= fieldSize * lclSF){
+            canvas.drawLine(x + fieldOX, 0, x + fieldOX, viewHeight, pField);
+            if(x + fieldOX != halfWidth + lclOffsetX)
+                canvas.drawText(String.format(Locale.ENGLISH, "%.2f", value), x + fieldOX, halfHeight + lclOffsetY - 4, pText);
             value -=  cellSize;
         }
 
         pText.setTextAlign(Paint.Align.LEFT);
 
-        value = (int)Math.ceil((localOffsetY / localScaleFactor)/ fieldSize) * cellSize;
-        for (float y = halfHeight; y + fieldOffsetY <= viewHeight; y += fieldSize * localScaleFactor){
-            canvas.drawLine(0, y + fieldOffsetY, viewWidth, y + fieldOffsetY, pField);
-            canvas.drawText(Integer.toString((int)value), halfWidth + localOffsetX + 4, y + fieldOffsetY, pText);
+        if(lclOffsetY < 0)
+            value = (int)Math.ceil((lclOffsetY / lclSF)/ fieldSize) * cellSize;
+        else
+            value = (int)Math.floor((lclOffsetY / lclSF)/ fieldSize) * cellSize;
+
+        for (float y = halfHeight; y + fieldOY <= viewHeight; y += fieldSize * lclSF){
+            canvas.drawLine(0, y + fieldOY, viewWidth, y + fieldOY, pField);
+            canvas.drawText(String.format(Locale.ENGLISH, "%.2f", value), halfWidth + lclOffsetX + 4, y + fieldOY, pText);
             value -=  cellSize;
         }
-        value = (int)Math.ceil((localOffsetY / localScaleFactor) / fieldSize) * cellSize + cellSize;
-        for (float y = halfHeight - fieldSize * localScaleFactor; y + fieldOffsetY >= 0; y -= fieldSize * localScaleFactor){
-            canvas.drawLine(0, y + fieldOffsetY, viewWidth, y + fieldOffsetY, pField);
-            canvas.drawText(Integer.toString((int)value), halfWidth + localOffsetX + 4, y + fieldOffsetY, pText);
+        if(lclOffsetY < 0)
+            value = (int)Math.ceil((lclOffsetY / lclSF)/ fieldSize) * cellSize + cellSize;
+        else
+            value = (int)Math.floor((lclOffsetY / lclSF)/ fieldSize) * cellSize + cellSize;
+        for (float y = halfHeight - fieldSize * lclSF; y + fieldOY >= 0; y -= fieldSize * lclSF){
+            canvas.drawLine(0, y + fieldOY, viewWidth, y + fieldOY, pField);
+            canvas.drawText(String.format(Locale.ENGLISH, "%.2f", value), halfWidth + lclOffsetX + 4, y + fieldOY, pText);
             value +=  cellSize;
         }
+        pText.setTextSize(18);
+        canvas.drawText(String.format(Locale.ENGLISH, "r = %.2f * e^(%.2f * fi)", a, k), 10, 20, pText);
+        canvas.drawText(String.format(Locale.ENGLISH, "fi <= %.2f", B * 180 / Math.PI), 10, 40, pText);
 
-        canvas.drawLine(0, halfHeight + localOffsetY, canvasWidth, halfHeight + localOffsetY, pAxis);
-        canvas.drawLine(halfWidth + localOffsetX, 0, halfWidth + localOffsetX, canvasHeight, pAxis);
+        canvas.drawLine(0, halfHeight + lclOffsetY, canvasWidth, halfHeight + lclOffsetY, pAxis);
+        canvas.drawLine(halfWidth + lclOffsetX, 0, halfWidth + lclOffsetX, canvasHeight, pAxis);
 
         float res = function(0);
         pathGraph.reset();
-        pathGraph.moveTo(localOffsetX + halfWidth + res * (float)Math.cos(0) * optimalScale * localScaleFactor,
-                localOffsetY + halfHeight - res * (float)Math.sin(0) * optimalScale * localScaleFactor);
+        pathGraph.moveTo(lclOffsetX + halfWidth + res * (float)Math.cos(0) * optimalScale * lclSF,
+                lclOffsetY + halfHeight - res * (float)Math.sin(0) * optimalScale * lclSF);
         for (float t = 0; t <= B; t += Math.PI/180){
             res = function(t);
-            pathGraph.lineTo(localOffsetX + halfWidth + res * (float)Math.cos(t) * optimalScale * localScaleFactor,
-                    localOffsetY + halfHeight - res * (float)Math.sin(t) * optimalScale * localScaleFactor);
+            pathGraph.lineTo(lclOffsetX + halfWidth + res * (float)Math.cos(t) * optimalScale * lclSF,
+                    lclOffsetY + halfHeight - res * (float)Math.sin(t) * optimalScale * lclSF);
         }
         canvas.drawPath(pathGraph, pGraph);
     }
@@ -241,7 +261,30 @@ public class GraphView extends SurfaceView implements SurfaceHolder.Callback{
         public boolean onScale(ScaleGestureDetector detector) {
             float newScale = scaleFactor * scaleGestureDetector.getScaleFactor();
             if(newScale > 0.4 && newScale < 8){
-                GraphView.scaleFactor = newScale;
+                float focusX = scaleGestureDetector.getFocusX();
+                float focusY = scaleGestureDetector.getFocusY();
+                scaleFactor = newScale;
+                if(newScale < 0.6)
+                    textSize = 8;
+                else if(newScale < 0.8)
+                    textSize = 10;
+                else if(newScale < 1)
+                    textSize = 12;
+                else if(newScale < 2)
+                    textSize = 14;
+                else if(newScale < 4)
+                    textSize = 16;
+                else
+                    textSize = 18;
+                /*float a = getScrollX();
+                float b = getScrollY();
+                offsetX = focusX;
+                offsetY = focusY;
+                /*offsetX += offsetX + (getScrollX() + focusX) * scaleFactor - focusX;
+                offsetY += offsetY + (getScrollY() + focusY) * scaleFactor - focusY;*/
+
+
+
             }
             return true;
         }
