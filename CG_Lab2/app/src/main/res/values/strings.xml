@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CG_Lab2</string>
+    <string name="orthographic_projection">Orthographic projection</string>
+    <string name="isometric_projection">Isometric projection</string>
+</resources>
