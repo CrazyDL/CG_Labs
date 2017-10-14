@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:text="@string/isometric_projection"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_centerInParent="true"/>
+    <com.crazydl.cg_lab2.IsomProj
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/isom_pr_view"/>
+
 </RelativeLayout>

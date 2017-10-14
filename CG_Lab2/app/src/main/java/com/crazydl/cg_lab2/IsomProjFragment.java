@@ -8,9 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class IsomProjFragment extends Fragment {
+    IsomProj isomProj;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.isom_proj_fragment, container, false);
+        View view = inflater.inflate(R.layout.isom_proj_fragment, container, false);
+        isomProj = view.findViewById(R.id.isom_pr_view);
+        return view;
     }
 }
