@@ -1,10 +1,10 @@
 package com.crazydl.cg_lab2;
 
 public class OctagonalPrism {
-    public class Vertrex{
+    public class Vertex {
         private float x, y, z;
 
-        public Vertrex(float x, float y, float z) {
+        public Vertex(float x, float y, float z) {
             this.x = x;
             this.y = y;
             this.z = z;
@@ -36,34 +36,36 @@ public class OctagonalPrism {
     }
 
     static final int EDGES = 8;
-    private float radius = 100, edgeLen = 2 * radius * (float)Math.sin(Math.PI / 8);
-    private Vertrex[][] vertexes = new Vertrex[2][EDGES];
+    public float radius = 200, edgeLen = 2 * radius * (float)Math.sin(Math.PI / 8);
+    public Vertex[][] vrts;
 
     public OctagonalPrism() {
+        vrts = new Vertex[2][EDGES];
+
         float sinAlph = radius * (float)Math.sin(Math.PI / 4);
         float cosAlph = radius * (float)Math.cos(Math.PI / 4);
-        vertexes[0][0] = new Vertrex(radius, -radius, 0);
-        vertexes[1][0] = new Vertrex(radius, radius, 0);
+        vrts[0][0] = new Vertex(radius, -radius, 0);
+        vrts[1][0] = new Vertex(radius, radius, 0);
 
-        vertexes[0][0] = new Vertrex(cosAlph, -radius, -sinAlph);
-        vertexes[1][0] = new Vertrex(cosAlph, radius, -sinAlph);
+        vrts[0][1] = new Vertex(cosAlph, -radius, -sinAlph);
+        vrts[1][1] = new Vertex(cosAlph, radius, -sinAlph);
 
-        vertexes[0][0] = new Vertrex(0, -radius, -radius);
-        vertexes[1][0] = new Vertrex(0, radius, -radius);
+        vrts[0][2] = new Vertex(0, -radius, -radius);
+        vrts[1][2] = new Vertex(0, radius, -radius);
 
-        vertexes[0][0] = new Vertrex(-cosAlph, -radius, -sinAlph);
-        vertexes[1][0] = new Vertrex(-cosAlph, radius, -sinAlph);
+        vrts[0][3] = new Vertex(-cosAlph, -radius, -sinAlph);
+        vrts[1][3] = new Vertex(-cosAlph, radius, -sinAlph);
 
-        vertexes[0][0] = new Vertrex(-radius, -radius, 0);
-        vertexes[1][0] = new Vertrex(-radius, radius, 0);
+        vrts[0][4] = new Vertex(-radius, -radius, 0);
+        vrts[1][4] = new Vertex(-radius, radius, 0);
 
-        vertexes[0][0] = new Vertrex(-cosAlph, -radius, sinAlph);
-        vertexes[1][0] = new Vertrex(-cosAlph, radius, sinAlph);
+        vrts[0][5] = new Vertex(-cosAlph, -radius, sinAlph);
+        vrts[1][5] = new Vertex(-cosAlph, radius, sinAlph);
 
-        vertexes[0][0] = new Vertrex(0, -radius, radius);
-        vertexes[1][0] = new Vertrex(0, radius, radius);
+        vrts[0][6] = new Vertex(0, -radius, radius);
+        vrts[1][6] = new Vertex(0, radius, radius);
 
-        vertexes[0][0] = new Vertrex(cosAlph, -radius, sinAlph);
-        vertexes[1][0] = new Vertrex(cosAlph, radius, sinAlph);
+        vrts[0][7] = new Vertex(cosAlph, -radius, sinAlph);
+        vrts[1][7] = new Vertex(cosAlph, radius, sinAlph);
     }
 }
