@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.renderscript.Matrix3f;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -16,13 +15,13 @@ public class OrthogrProj extends View{
     Paint pFigure;
     Path path;
     OctagonalPrism octPrism;
-    Matrix3f matrix3f;
+    MyMatrix4 trans, reversTrans;
 
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-    private static float offsetX = 0;
-    private static float offsetY = 0;
+    private static float offsetX = (float)Math.PI / 6;
+    private static float offsetY = -(float)Math.PI / 6;
     private static float scale = 1f;
 
     public OrthogrProj(Context context) {
@@ -50,8 +49,44 @@ public class OrthogrProj extends View{
         pFigure.setStrokeJoin(Paint.Join.ROUND);
         pFigure.setStrokeCap(Paint.Cap.ROUND);
         pFigure.setAntiAlias(true);
+        initTransformMatrix();
+    }
 
-        matrix3f = new Matrix3f();
+    private void initTransformMatrix(){
+        MyMatrix4 scaleMatrix = new MyMatrix4(new float[]{scale, 0, 0, 0,
+                0, scale, 0, 0,
+                0, 0, scale, 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 horizontalRotateMatrix = new MyMatrix4(new float[] {(float)Math.cos(offsetX), 0, (float)Math.sin(offsetX), 0,
+                0, 1, 0, 0,
+                (float)-Math.sin(offsetX), 0, (float)Math.cos(offsetX), 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 verticalRotateMatrix = new MyMatrix4(new float[] {1, 0, 0, 0,
+                0, (float)Math.cos(offsetY), (float)Math.sin(offsetY), 0,
+                0, (float)-Math.sin(offsetY), (float)Math.cos(offsetY), 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 revScaleMatrix = new MyMatrix4(new float[]{1/scale, 0, 0, 0,
+                0, 1/scale, 0, 0,
+                0, 0, 1/scale, 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 revHorizontalRotateMatrix = new MyMatrix4(new float[] {(float)Math.cos(offsetX), 0, -(float)Math.sin(offsetX), 0,
+                0, 1, 0, 0,
+                (float)Math.sin(offsetX), 0, (float)Math.cos(offsetX), 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 revVerticalRotateMatrix = new MyMatrix4(new float[] {1, 0, 0, 0,
+                0, (float)Math.cos(offsetY), -(float)Math.sin(offsetY), 0,
+                0, (float)Math.sin(offsetY), (float)Math.cos(offsetY), 1,
+                0, 0, 0, 1});
+
+
+        trans = horizontalRotateMatrix.multiply(verticalRotateMatrix.multiply(scaleMatrix));
+        reversTrans = revScaleMatrix.multiply(revVerticalRotateMatrix.multiply(revHorizontalRotateMatrix));
+
     }
 
     @Override
@@ -59,23 +94,29 @@ public class OrthogrProj extends View{
         float viewWidth = canvas.getWidth();
         float viewHeight = canvas.getHeight();
         canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
-
         canvas.translate(viewWidth / 2, viewHeight / 2);
-        matrix3f.scale(scale, scale, scale);
+
+        //float[][] newPlane = reversTrans.multiply(octPrism.planes);
 
         path.reset();
-        for (int i = 0; i < OctagonalPrism.EDGES - 1; i++){
-            path.moveTo(octPrism.vrts[0][i].getX(), octPrism.vrts[0][i].getY());
-            path.lineTo(octPrism.vrts[0][i + 1].getX(), octPrism.vrts[0][i + 1].getY());
-            path.lineTo(octPrism.vrts[1][i + 1].getX(), octPrism.vrts[1][i + 1].getY());
-            path.lineTo(octPrism.vrts[1][i].getX(), octPrism.vrts[1][i].getY());
-            path.lineTo(octPrism.vrts[0][i].getX(), octPrism.vrts[0][i].getY());
+        for (int i = 0; i < OctagonalPrism.EDGES; i++){
+            //if(newPlane[2][(i + 1) % 8] >= 0) {
+                path.moveTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[0][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[0][(i + 1) % 8]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[1][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[1][(i + 1) % 8]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[1][i]).getX(), trans.transform(octPrism.vrts[1][i]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+            //}
         }
-        path.moveTo(octPrism.vrts[0][OctagonalPrism.EDGES - 1].getX(), octPrism.vrts[0][OctagonalPrism.EDGES - 1].getY());
-        path.lineTo(octPrism.vrts[0][0].getX(), octPrism.vrts[0][0].getY());
-        path.moveTo(octPrism.vrts[1][OctagonalPrism.EDGES - 1].getX(), octPrism.vrts[1][OctagonalPrism.EDGES - 1].getY());
-        path.lineTo(octPrism.vrts[1][0].getX(), octPrism.vrts[1][0].getY());
-
+        for (int k = 0; k < 2; k++){
+            //if(newPlane[2][OctagonalPrism.EDGES + k] >= 0) {
+                path.moveTo(trans.transform(octPrism.vrts[k][0]).getX(), trans.transform(octPrism.vrts[k][0]).getY());
+                for (int i = 1; i < OctagonalPrism.EDGES; i++) {
+                    path.lineTo(trans.transform(octPrism.vrts[k][i]).getX(), trans.transform(octPrism.vrts[k][i]).getY());
+                }
+                path.lineTo(trans.transform(octPrism.vrts[k][0]).getX(), trans.transform(octPrism.vrts[k][0]).getY());
+            //}
+        }
         canvas.drawPath(path, pFigure);
 
 
@@ -108,8 +149,10 @@ public class OrthogrProj extends View{
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float newScale = scale * scaleGestureDetector.getScaleFactor();
-            if(newScale > 0.4 && newScale < 2)
+            if(newScale > 0.4 && newScale < 2){
                 scale = newScale;
+                initTransformMatrix();
+            }
             return true;
         }
     }
@@ -118,16 +161,18 @@ public class OrthogrProj extends View{
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            offsetX -= distanceX;
-            offsetY -= distanceY;
+            offsetX += distanceX / 200;
+            offsetY -= distanceY / 200;
+            initTransformMatrix();
             return true;
         }
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent event){
             scale = 1f;
-            offsetX = 0;
-            offsetY = 0;
+            offsetX = (float)Math.PI / 6;
+            offsetY = -(float)Math.PI / 6;
+            initTransformMatrix();
             return true;
         }
     }

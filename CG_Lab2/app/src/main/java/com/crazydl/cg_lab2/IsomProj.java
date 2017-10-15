@@ -3,122 +3,134 @@ package com.crazydl.cg_lab2;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-public class IsomProj extends View {
-    Paint pFigure = new Paint();
-    Paint pText = new Paint();
+public class IsomProj extends View{
+    Paint pFigure;
+    Path path;
+    OctagonalPrism octPrism;
+    MyMatrix4 trans;
 
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-    private static float viewWidth, viewHeight;
+    private static float offsetX = (float)Math.PI / 6;
+    private static float offsetY = (float)Math.PI / 6;
+    private static float scale = 1f;
 
     public IsomProj(Context context) {
         super(context);
+        init(context);
     }
 
     public IsomProj(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
+    }
+
+    private void init(Context context){
+        scaleGestureDetector = new ScaleGestureDetector(context, new MyScaleGestureListener());
+        gestureDetector = new GestureDetector(context, new MyGestureListener());
+
+        octPrism = new OctagonalPrism();
+
+        pFigure = new Paint();
+        path = new Path();
+
+        pFigure.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        pFigure.setStrokeWidth(4);
+        pFigure.setStyle(Paint.Style.STROKE);
+        pFigure.setStrokeJoin(Paint.Join.ROUND);
+        pFigure.setStrokeCap(Paint.Cap.ROUND);
+        pFigure.setAntiAlias(true);
+        initTransformMatrix();
+    }
+
+    private void initTransformMatrix(){
+        MyMatrix4 scaleMatrix = new MyMatrix4(new float[]{scale, 0, 0, 0,
+                0, scale, 0, 0,
+                0, 0, scale, 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 horizontalRotateMatrix = new MyMatrix4(new float[] {(float)Math.cos(offsetX), 0, (float)Math.sin(offsetX), 0,
+                0, 1, 0, 0,
+                (float)-Math.sin(offsetX), 0, (float)Math.cos(offsetX), 1,
+                0, 0, 0, 1});
+
+        MyMatrix4 verticalRotateMatrix = new MyMatrix4(new float[] {1, 0, 0, 0,
+                0, (float)Math.cos(offsetY), (float)Math.sin(offsetY), 0,
+                0, (float)-Math.sin(offsetY), (float)Math.cos(offsetY), 1,
+                0, 0, 0, 1});
+
+        trans = horizontalRotateMatrix.multiply(verticalRotateMatrix.multiply(scaleMatrix));
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        viewWidth = canvas.getWidth();
-        viewHeight = canvas.getHeight();
+        float viewWidth = canvas.getWidth();
+        float viewHeight = canvas.getHeight();
         canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
-        pText.setTextSize(64);
-        pText.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("TODO", viewWidth / 2, viewHeight / 2, pText);
+        canvas.save();
+        canvas.translate(viewWidth / 2, viewHeight / 2);
+        canvas.scale(0.866f, -0.5f);
+        canvas.skew(0, 0.866f);
+
+        path.reset();
+        for (int i = 0; i < OctagonalPrism.EDGES; i++){
+            path.moveTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+            path.lineTo(trans.transform(octPrism.vrts[0][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[0][(i + 1) % 8]).getY());
+            path.lineTo(trans.transform(octPrism.vrts[1][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[1][(i + 1) % 8]).getY());
+            path.lineTo(trans.transform(octPrism.vrts[1][i]).getX(), trans.transform(octPrism.vrts[1][i]).getY());
+            path.lineTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+        }
+        canvas.drawPath(path, pFigure);
+        canvas.restore();
         invalidate();
     }
-}
 
-/*public class IsomProj extends SurfaceView implements SurfaceHolder.Callback {
-
-    Paint pFigure = new Paint();
-    Paint pText = new Paint();
-
-    private DrawThread drawThread;
-    private ScaleGestureDetector scaleGestureDetector;
-    private GestureDetector gestureDetector;
-
-    private static float viewWidth, viewHeight;
-
-    public IsomProj(Context context) {
-        super(context);
-        getHolder().addCallback(this);
-    }
-
-    public IsomProj(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        getHolder().addCallback(this);
-    }
 
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        drawThread = new DrawThread(getHolder());
-        drawThread.setRunning(true);
-        drawThread.start();
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
+        return true;
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-        viewHeight = i2;
-        viewWidth = i1;
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        boolean retry = true;
-        drawThread.setRunning(false);
-        while (retry){
-            try {
-                drawThread.join();
-                retry = false;
-            } catch (InterruptedException ignored){}
+    private class MyScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            float newScale = scale * scaleGestureDetector.getScaleFactor();
+            if(newScale > 0.4 && newScale < 2){
+                scale = newScale;
+                initTransformMatrix();
+            }
+            return true;
         }
     }
 
-    private void DrawFigure(Canvas canvas){
-        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
-        pText.setTextSize(64);
-        pText.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("DO", viewWidth / 2, viewHeight / 2, pText);
-    }
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
-    private class DrawThread extends Thread{
-        private SurfaceHolder surfaceHolder;
-        private boolean running = false;
-
-        DrawThread(SurfaceHolder surfaceHolder) {
-            this.surfaceHolder = surfaceHolder;
-        }
-
-        void setRunning(boolean running) {
-            this.running = running;
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            offsetX += distanceX / 200;
+            offsetY -= distanceY / 200;
+            initTransformMatrix();
+            return true;
         }
 
         @Override
-        public void run() {
-            Canvas canvas;
-            while (running){
-                canvas = null;
-                try {
-                    canvas = surfaceHolder.lockCanvas();
-                    if (canvas == null){
-                        continue;
-                    }
-                    DrawFigure(canvas);
-                } finally {
-                    if(canvas != null){
-                        surfaceHolder.unlockCanvasAndPost(canvas);
-                    }
-                }
-            }
+        public boolean onDoubleTapEvent(MotionEvent event){
+            scale = 1f;
+            offsetX = (float)Math.PI / 6;
+            offsetY = (float)Math.PI / 6;
+            initTransformMatrix();
+            return true;
         }
-    }*/
+    }
+}
