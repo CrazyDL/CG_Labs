@@ -15,7 +15,7 @@ public class IsomProj extends View{
     Paint pFigure;
     Path path;
     OctagonalPrism octPrism;
-    MyMatrix4 trans;
+    MyMatrix4 trans, reversTrans;
 
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
@@ -53,41 +53,78 @@ public class IsomProj extends View{
     }
 
     private void initTransformMatrix(){
-        MyMatrix4 scaleMatrix = new MyMatrix4(new float[]{scale, 0, 0, 0,
+        MyMatrix4 scaleMatrix = new MyMatrix4(new float[]{
+                scale, 0, 0, 0,
                 0, scale, 0, 0,
-                0, 0, scale, 1,
+                0, 0, scale, 0,
                 0, 0, 0, 1});
 
-        MyMatrix4 horizontalRotateMatrix = new MyMatrix4(new float[] {(float)Math.cos(offsetX), 0, (float)Math.sin(offsetX), 0,
+        MyMatrix4 horizontalRotateMatrix = new MyMatrix4(new float[] {
+                (float)Math.cos(offsetX), 0, (float)Math.sin(offsetX), 0,
                 0, 1, 0, 0,
-                (float)-Math.sin(offsetX), 0, (float)Math.cos(offsetX), 1,
+                (float)-Math.sin(offsetX), 0, (float)Math.cos(offsetX), 0,
                 0, 0, 0, 1});
 
-        MyMatrix4 verticalRotateMatrix = new MyMatrix4(new float[] {1, 0, 0, 0,
+        MyMatrix4 verticalRotateMatrix = new MyMatrix4(new float[] {
+                1, 0, 0, 0,
                 0, (float)Math.cos(offsetY), (float)Math.sin(offsetY), 0,
-                0, (float)-Math.sin(offsetY), (float)Math.cos(offsetY), 1,
+                0, (float)-Math.sin(offsetY), (float)Math.cos(offsetY), 0,
                 0, 0, 0, 1});
+
+        MyMatrix4 revScaleMatrix = new MyMatrix4(new float[]{
+                1/scale, 0, 0, 0,
+                0, 1/scale, 0, 0,
+                0, 0, 1/scale, 0,
+                0, 0, 0, 1});
+
+        MyMatrix4 revHorizontalRotateMatrix = new MyMatrix4(new float[] {
+                (float)Math.cos(offsetX), 0, -(float)Math.sin(offsetX), 0,
+                0, 1, 0, 0,
+                (float)Math.sin(offsetX), 0, (float)Math.cos(offsetX), 0,
+                0, 0, 0, 1});
+
+        MyMatrix4 revVerticalRotateMatrix = new MyMatrix4(new float[] {
+                1, 0, 0, 0,
+                0, (float)Math.cos(offsetY), -(float)Math.sin(offsetY), 0,
+                0, (float)Math.sin(offsetY), (float)Math.cos(offsetY), 0,
+                0, 0, 0, 1});
+
 
         trans = horizontalRotateMatrix.multiply(verticalRotateMatrix.multiply(scaleMatrix));
+        reversTrans = (revScaleMatrix.multiply(revVerticalRotateMatrix)).multiply(revHorizontalRotateMatrix);
+
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         float viewWidth = canvas.getWidth();
         float viewHeight = canvas.getHeight();
-        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorCanvasBackground));
+        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.colorWhite));
         canvas.save();
         canvas.translate(viewWidth / 2, viewHeight / 2);
         canvas.scale(0.866f, -0.5f);
         canvas.skew(0, 0.866f);
 
+        float[][] newPlane = reversTrans.multiply(octPrism.planes);
+
         path.reset();
         for (int i = 0; i < OctagonalPrism.EDGES; i++){
-            path.moveTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
-            path.lineTo(trans.transform(octPrism.vrts[0][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[0][(i + 1) % 8]).getY());
-            path.lineTo(trans.transform(octPrism.vrts[1][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[1][(i + 1) % 8]).getY());
-            path.lineTo(trans.transform(octPrism.vrts[1][i]).getX(), trans.transform(octPrism.vrts[1][i]).getY());
-            path.lineTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+            if(newPlane[2][(i + 1) % 8] <= 0) {
+                path.moveTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[0][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[0][(i + 1) % 8]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[1][(i + 1) % 8]).getX(), trans.transform(octPrism.vrts[1][(i + 1) % 8]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[1][i]).getX(), trans.transform(octPrism.vrts[1][i]).getY());
+                path.lineTo(trans.transform(octPrism.vrts[0][i]).getX(), trans.transform(octPrism.vrts[0][i]).getY());
+            }
+        }
+        for (int k = 0; k < 2; k++){
+            if(newPlane[2][OctagonalPrism.EDGES + k] <= 0) {
+                path.moveTo(trans.transform(octPrism.vrts[k][0]).getX(), trans.transform(octPrism.vrts[k][0]).getY());
+                for (int i = 1; i < OctagonalPrism.EDGES; i++) {
+                    path.lineTo(trans.transform(octPrism.vrts[k][i]).getX(), trans.transform(octPrism.vrts[k][i]).getY());
+                }
+                path.lineTo(trans.transform(octPrism.vrts[k][0]).getX(), trans.transform(octPrism.vrts[k][0]).getY());
+            }
         }
         canvas.drawPath(path, pFigure);
         canvas.restore();
