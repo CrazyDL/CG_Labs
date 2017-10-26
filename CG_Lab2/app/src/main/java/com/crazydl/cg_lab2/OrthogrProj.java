@@ -20,8 +20,8 @@ public class OrthogrProj extends View{
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-    private static float offsetX = (float)Math.PI / 6;
-    private static float offsetY = -(float)Math.PI / 6;
+    private static float offsetX = 0;
+    private static float offsetY = 0;
     private static float scale = 1f;
 
     public OrthogrProj(Context context) {
@@ -176,8 +176,8 @@ public class OrthogrProj extends View{
         @Override
         public boolean onDoubleTapEvent(MotionEvent event){
             scale = 1f;
-            offsetX = (float)Math.PI / 6;
-            offsetY = -(float)Math.PI / 6;
+            offsetX = 0;
+            offsetY = 0;
             initTransformMatrix();
             return true;
         }
