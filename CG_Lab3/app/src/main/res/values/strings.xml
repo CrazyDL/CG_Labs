@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">CG_Lab3</string>
+    <string name="vertical_approximation">Vertical approximation</string>
+    <string name="horizontal_approximation">Horizontal approximation</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
