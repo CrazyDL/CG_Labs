@@ -1,5 +1,8 @@
 package com.crazydl.cg_lab2;
-
+/*
+ *  Author: Denis Levshtanov
+ *  8O-308b
+ */
 public class OctagonalPrism {
     static public class Vertex {
         private float x, y, z;

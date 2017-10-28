@@ -1,5 +1,8 @@
 package com.crazydl.cg_lab2;
-
+/*
+ *  Author: Denis Levshtanov
+ *  8O-308b
+ */
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;

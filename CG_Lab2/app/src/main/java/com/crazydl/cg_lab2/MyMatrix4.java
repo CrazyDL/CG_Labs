@@ -1,5 +1,8 @@
 package com.crazydl.cg_lab2;
-
+/*
+ *  Author: Denis Levshtanov
+ *  8O-308b
+ */
 public class MyMatrix4 {
     private float[] values;
 

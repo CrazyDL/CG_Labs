@@ -1,5 +1,8 @@
 package com.crazydl.cg_lab2;
-
+/*
+ *  Author: Denis Levshtanov
+ *  8O-308b
+ */
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
