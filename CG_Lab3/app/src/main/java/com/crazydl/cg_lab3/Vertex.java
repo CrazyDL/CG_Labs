@@ -1,9 +1,12 @@
 package com.crazydl.cg_lab3;
-
+/*
+ *  Author: Denis Levshtanov
+ *  8O-308b
+ */
 class Vertex {
     private float x, y, z;
 
-    public Vertex(float x, float y, float z) {
+    Vertex(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;

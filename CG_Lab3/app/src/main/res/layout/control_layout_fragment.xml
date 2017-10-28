@@ -11,13 +11,18 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/TVForSBStyle"
             android:text="@string/vertical_approximation"/>
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/TVForSBStyle"
             android:text="@string/horizontal_approximation"/>
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/upper_radius"/>
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/downer_radius"/>
+
 
     </LinearLayout>
 
@@ -28,11 +33,23 @@
 
         <SeekBar
             android:id="@+id/sBAprHor"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            style="@style/SBStyle"
+            android:max="30"
+            android:progress="10"/>
         <SeekBar
             android:id="@+id/sBAprVer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            style="@style/SBStyle"
+            android:max="30"
+            android:progress="10"/>
+        <SeekBar
+            android:id="@+id/sBUpRad"
+            style="@style/SBStyle"
+            android:max="200"
+            android:progress="160"/>
+        <SeekBar
+            android:id="@+id/sBDownRad"
+            style="@style/SBStyle"
+            android:max="200"
+            android:progress="180"/>
     </LinearLayout>
 </LinearLayout>

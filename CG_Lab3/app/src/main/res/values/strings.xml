@@ -3,6 +3,6 @@
     <string name="vertical_approximation">Vertical approximation</string>
     <string name="horizontal_approximation">Horizontal approximation</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="upper_radius">Upper radius</string>
+    <string name="downer_radius">Downer radius</string>
 </resources>

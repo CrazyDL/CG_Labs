@@ -3,9 +3,4 @@
     <color name="colorPrimary">#009999</color>
     <color name="colorPrimaryDark">#006363</color>
     <color name="colorAccent">#004D4D</color>
-    <color name="colorCanvasBackground">#DBFFFF</color>
-    <color name="colorBackground">#CCFFFF</color>
-    <color name="colorAxis">#8F9595</color>
-    <color name="colorWhite">#FFF</color>
-    <color name="colorBlack">#000</color>
 </resources>
