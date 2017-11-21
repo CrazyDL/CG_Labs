@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/vertical_approximation"/>
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/horizontal_approximation"/>
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/upper_radius"/>
+        <TextView
+            style="@style/TVForSBStyle"
+            android:text="@string/downer_radius"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <SeekBar
+            android:id="@+id/sBAprHor"
+            style="@style/SBStyle"
+            android:max="30"
+            android:progress="10"/>
+        <SeekBar
+            android:id="@+id/sBAprVer"
+            style="@style/SBStyle"
+            android:max="30"
+            android:progress="10"/>
+        <SeekBar
+            android:id="@+id/sBUpRad"
+            style="@style/SBStyle"
+            android:max="400"
+            android:progress="380"/>
+        <SeekBar
+            android:id="@+id/sBDownRad"
+            style="@style/SBStyle"
+            android:max="400"
+            android:progress="360"/>
+    </LinearLayout>
+</LinearLayout>

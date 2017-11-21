@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">CG_Lab3</string>
+    <string name="vertical_approximation">Vertical approximation</string>
+    <string name="horizontal_approximation">Horizontal approximation</string>
+
+    <string name="upper_radius">Upper radius</string>
+    <string name="downer_radius">Downer radius</string>
+</resources>
