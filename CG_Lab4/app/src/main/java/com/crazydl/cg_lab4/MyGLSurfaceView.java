@@ -14,7 +14,7 @@ class MyGLSurfaceView extends GLSurfaceView {
     public MyGLSurfaceView(Context context){
         super(context);
         setEGLContextClientVersion(2);
-        setRenderer(new MyGLRenderer(context));
+        setRenderer(new MyGLRenderer());
 
         scaleGestureDetector = new ScaleGestureDetector(context, new MyScaleGestureListener());
         gestureDetector = new GestureDetector(context, new MyGestureListener());
@@ -32,7 +32,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float newScale = MyGLRenderer.scale * scaleGestureDetector.getScaleFactor();
-            if (newScale > 0.4 && newScale < 2) {
+            if (newScale > 0.4 && newScale < 2.5) {
                 MyGLRenderer.scale = newScale;
                 MyGLRenderer.initTransformMatrix();
             }
@@ -44,7 +44,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            MyGLRenderer.offsetX -= distanceX / 200;
+            MyGLRenderer.offsetX += distanceX / 200;
             MyGLRenderer.offsetY -= distanceY / 200;
             MyGLRenderer.initTransformMatrix();
             return true;
@@ -52,7 +52,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent event) {
-            MyGLRenderer.scale = 1f;
+            MyGLRenderer.scale = 1.5f;
             MyGLRenderer.offsetX = 0;
             MyGLRenderer.offsetY = 0;
             MyGLRenderer.initTransformMatrix();

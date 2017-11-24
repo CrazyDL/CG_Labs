@@ -4,7 +4,6 @@ package com.crazydl.cg_lab4;
  *  8O-308b
  */
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -18,33 +17,28 @@ import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
 
-public class MyGLRenderer implements GLSurfaceView.Renderer {
-    public static int vertAppr = 20;
-    public static int horAppr = 20;
-    public static float aLen = 0.38f;
-    public static float bLen = 0.36f;
-    public static final float RADIUS = 0.4f;
-    public static final int COLOR_R = 0;
-    public static final int COLOR_G = 200;
-    public static final int COLOR_B = 255;
-    public static int width;
-    public static int height;
-    public static float offsetX = 10;
-    public static float offsetY = 10;
-    public static float scale = 1f;
+class MyGLRenderer implements GLSurfaceView.Renderer {
+    static int vertAppr = 20;
+    static int horAppr = 20;
+    static float aLen = 0.38f;
+    static float bLen = 0.36f;
+    static float offsetX = 10;
+    static float offsetY = 10;
+    static float scale = 1.5f;
+    private static final float RADIUS = 0.4f;
     private float[] mVMatrix = new float[16];
     private float[] mPMatrix = new float[16];
     private float[] mMVPMatrix = new float[16];
 
-    static MyMatrix3 trans;
+    private static MyMatrix3 trans;
 
     private DrawHelper mDrawHelper;
 
-    MyGLRenderer(Context context) {
+    MyGLRenderer() {
         super();
     }
 
-    static public void initTransformMatrix() {
+    static void initTransformMatrix() {
         MyMatrix3 scaleMatrix = new MyMatrix3(new float[]{
                 scale, 0, 0,
                 0, scale, 0,
@@ -62,35 +56,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         trans = horizontalRotateMatrix.multiply(verticalRotateMatrix.multiply(scaleMatrix));
     }
-/*
-
-        for (int k = 0; k < 2; k++) {
-            for (int j = 0; j < horAppr; j++) {
-                float curRadius = (float) Math.sqrt(RADIUS * RADIUS - (k == 0 ? aLen * aLen : bLen * bLen));
-                float curAlpha = (2 * (float) Math.PI * j) / horAppr;
-                float nextAlpha = (2 * (float) Math.PI * (j + 1)) / horAppr;
-
-                a = trans.transform(
-                        curRadius * (float) Math.sin(nextAlpha),
-                        (k == 0 ? -aLen : bLen),
-                        curRadius * (float) Math.cos(nextAlpha));
-                b = trans.transform(
-                        0,
-                        (k == 0 ? -aLen : bLen),
-                        0);
-                c = trans.transform(
-                        curRadius * (float) Math.sin(curAlpha),
-                        (k == 0 ? -aLen : bLen),
-                        curRadius * (float) Math.cos(curAlpha));
-
-
-
-*/
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         glClearColor(1f, 1f, 1f, 1f);
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 4f, 0f, 0f, -4f, 0f, 1.0f, 0.0f);
 
         mDrawHelper = new DrawHelper();
         initTransformMatrix();
@@ -98,10 +68,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     @Override
-    public void onSurfaceChanged(GL10 gl, int newWidth, int newHeight) {
-        width = newWidth;
-        height = newHeight;
-
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
         gl.glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
@@ -109,12 +76,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     private float[] trianglesCoords;
+    private float[] normalCoords;
     private int ind;
 
-    private void putCoord(Vertex v) {
+    private void putCoord(Vertex v, Vertex n) {
         trianglesCoords[ind * 3] = v.getX();
         trianglesCoords[ind * 3 + 1] = v.getY();
         trianglesCoords[ind * 3 + 2] = v.getZ();
+        normalCoords[ind * 3] = n.getX();
+        normalCoords[ind * 3 + 1] = n.getY();
+        normalCoords[ind * 3 + 2] = n.getZ();
         ind++;
     }
 
@@ -129,8 +100,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniformMatrix4fv(mDrawHelper.getMuMVPMatrixHandle(), 1, false, mMVPMatrix, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gl.glEnable(GL_DEPTH_TEST);
+        gl.glEnable(GL10.GL_LIGHTING);
         ind = 0;
-        trianglesCoords = new float[(svVertAppr + 1 ) * svHorAppr * 18];
+        trianglesCoords = new float[(svVertAppr + 1) * svHorAppr * 18];
+        normalCoords = new float[(svVertAppr + 1) * svHorAppr * 18];
         Vertex a, b, c, d;
         float trgHeight = (svALen + svBLen) / svVertAppr;
         float nextRadius = (float) Math.sqrt(RADIUS * RADIUS - svALen * svALen);
@@ -157,12 +130,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                         nextRadius * (float) Math.sin(nextAlpha),
                         -svALen + trgHeight * (i + 1),
                         nextRadius * (float) Math.cos(nextAlpha));
-                putCoord(c);
-                putCoord(b);
-                putCoord(a);
-                putCoord(d);
-                putCoord(b);
-                putCoord(a);
+
+                Vertex v1 = new Vertex(a.getX() - b.getX(), a.getY() - b.getY(), a.getZ() - b.getZ());
+                Vertex v2 = new Vertex(b.getX() - c.getX(), b.getY() - c.getY(), b.getZ() - c.getZ());
+                Vertex v3 = new Vertex(b.getX() - d.getX(), b.getY() - d.getY(), b.getZ() - d.getZ());
+
+                Vertex n1 = new Vertex(v1.getY() * v2.getZ() - v1.getZ() * v2.getY(),
+                        v1.getZ() * v2.getX() - v1.getX() * v2.getZ(),
+                        v1.getX() * v2.getY() - v1.getY() * v2.getX());
+
+                Vertex n2 = new Vertex(v2.getY() * v3.getZ() - v2.getZ() * v3.getY(),
+                        v2.getZ() * v3.getX() - v2.getX() * v3.getZ(),
+                        v2.getX() * v3.getY() - v2.getY() * v3.getX());
+
+                putCoord(c, n1);
+                putCoord(b, n1);
+                putCoord(a, n1);
+                putCoord(d, n2);
+                putCoord(b, n2);
+                putCoord(a, n2);
             }
         }
 
@@ -184,11 +170,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                         curRadius * (float) Math.sin(curAlpha),
                         (k == 0 ? -svALen : svBLen),
                         curRadius * (float) Math.cos(curAlpha));
-                putCoord(a);
-                putCoord(c);
-                putCoord(b);
+                Vertex v1 = new Vertex(a.getX() - b.getX(), a.getY() - b.getY(), a.getZ() - b.getZ());
+                Vertex v2 = new Vertex(c.getX() - a.getX(), c.getY() - a.getY(), c.getZ() - a.getZ());
+
+                Vertex n;
+                if (k == 0) {
+                    n = new Vertex(v1.getY() * v2.getZ() - v1.getZ() * v2.getY(),
+                            v1.getZ() * v2.getX() - v1.getX() * v2.getZ(),
+                            v1.getX() * v2.getY() - v1.getY() * v2.getX());
+                } else {
+                    n = new Vertex(v1.getZ() * v2.getY() - v1.getY() * v2.getZ(),
+                            v1.getX() * v2.getZ() - v1.getZ() * v2.getX(),
+                            v1.getY() * v2.getX() - v1.getX() * v2.getY());
+                }
+                putCoord(a, n);
+                putCoord(b, n);
+                putCoord(c, n);
             }
         }
-        mDrawHelper.draw(gl, trianglesCoords);
+        mDrawHelper.draw(trianglesCoords, normalCoords);
     }
 }

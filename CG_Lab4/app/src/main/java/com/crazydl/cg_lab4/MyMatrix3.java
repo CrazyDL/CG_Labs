@@ -3,12 +3,9 @@ package com.crazydl.cg_lab4;
  *  Author: Denis Levshtanov
  *  8O-308b
  */
+
 class MyMatrix3 {
     private float[] values;
-
-    public float[] getValues() {
-        return values;
-    }
 
     MyMatrix3(float[] values) {
         this.values = values;
@@ -33,7 +30,7 @@ class MyMatrix3 {
     }
 
     Vertex transform(float x, float y, float z) {
-        return new Vertex(x * values[0] +y * values[3] + z * values[6],
+        return new Vertex(x * values[0] + y * values[3] + z * values[6],
                 x * values[1] + y * values[4] + z * values[7],
                 x * values[2] + y * values[5] + z * values[8]);
     }
